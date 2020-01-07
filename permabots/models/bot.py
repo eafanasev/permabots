@@ -307,8 +307,13 @@ class TelegramBot(IntegrationBot):
         return "%s" % (self.user_api.first_name or self.token if self.user_api else self.token)
     
     def init_bot(self):
-        self._bot = TelegramBotAPI(self.token)
-    
+        bot_kwargs = {}
+        if hasattr(settings, 'MICROBOT_PROXY'):
+            bot_kwargs = {
+                'request': Request(**settings.MICROBOT_PROXY)
+            }
+        self._bot = TelegramBotAPI(self.token, **bot_kwargs)
+
     @property
     def hook_id(self):
         return str(self.id)
@@ -324,10 +329,10 @@ class TelegramBot(IntegrationBot):
     @property
     def identity(self):
         return 'telegram'
-    
-    def set_webhook(self, url):
-        self._bot.set_webhook(webhook_url=url)
-        
+
+    def set_webhook(self, url, certificate=None):
+        self._bot.set_webhook(url=url, certificate=certificate)
+
     def _get_chat_and_user(self, update):
         if update.message:
             chat = update.message.chat

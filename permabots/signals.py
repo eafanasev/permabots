@@ -27,6 +27,10 @@ def set_bot_webhook(sender, instance, **kwargs):
             if site_domain is None:
                 site_domain = get_site_domain()
             webhook_kwargs['url'] = 'https://' + site_domain + webhook
+            certificate_filename = getattr(settings, 'MICROBOT_WEBHOOK_CERTIFICATE', False)
+            if certificate_filename:
+                import os
+                webhook_kwargs['certificate'] = open(os.path.join(settings.BASE_DIR, certificate_filename), 'rb')
         instance.set_webhook(**webhook_kwargs)
         logger.info("Success: Webhook url %s for bot %s set" % (webhook_kwargs['url'], str(instance)))
     except:
