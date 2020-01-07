@@ -18,15 +18,19 @@ def set_bot_webhook(sender, instance, **kwargs):
         instance.init_bot()
     try:
         # set webhook
-        url = instance.null_url
+        webhook_kwargs = {
+            'url': instance.null_url
+        }
         if instance.enabled:
             webhook = reverse(instance.hook_url, kwargs={'hook_id': instance.hook_id})
-            url = 'https://' + getattr(settings, 'MICROBOT_WEBHOOK_DOMAIN', get_site_domain()) + webhook   
-        instance.set_webhook(url)
-        logger.info("Success: Webhook url %s for bot %s set" % (url, str(instance)))
-        
+            site_domain = getattr(settings, 'MICROBOT_WEBHOOK_DOMAIN', None)
+            if site_domain is None:
+                site_domain = get_site_domain()
+            webhook_kwargs['url'] = 'https://' + site_domain + webhook
+        instance.set_webhook(**webhook_kwargs)
+        logger.info("Success: Webhook url %s for bot %s set" % (webhook_kwargs['url'], str(instance)))
     except:
-        logger.error("Failure: Webhook url %s for bot %s not set" % (url, str(instance)))
+        logger.error("Failure: Webhook url %s for bot %s not set" % (webhook_kwargs['url'], str(instance)))
         raise
     
 def set_bot_api_data(sender, instance, **kwargs):
@@ -40,7 +44,7 @@ def set_bot_api_data(sender, instance, **kwargs):
             bot_api = instance._bot.get_me()
             User = apps.get_model('permabots', 'User')
             user_dict = bot_api.to_dict()
-            user_dict.pop('type')
+            user_dict.pop('is_bot', None)
             user_api, _ = User.objects.get_or_create(**user_dict)
             instance.user_api = user_api
             logger.info("Success: Bot api info for bot %s set" % str(instance))

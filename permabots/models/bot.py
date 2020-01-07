@@ -8,9 +8,11 @@ import logging
 from permabots.models.base import PermabotsModel
 from permabots.models import TelegramUser, TelegramChatState, KikChatState, MessengerChatState
 from django.urls import URLResolver
+from django.urls.resolvers import RegexPattern
 from django.urls import Resolver404
-from telegram import ParseMode, ReplyKeyboardHide, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import ParseMode, ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.bot import InvalidToken
+from telegram.utils.request import Request
 import ast
 from django.conf import settings
 from permabots import validators
@@ -101,8 +103,8 @@ class Bot(PermabotsModel):
                     state_context = chat_state.ctx
                 if not source_states or (chat_state and chat_state.state in source_states):
                         urlpatterns.append(handler.urlpattern())
-                    
-        resolver = RegexURLResolver(r'^', urlpatterns)
+
+        resolver = URLResolver(RegexPattern(r'^'), urlpatterns)
         try:
             resolver_match = resolver.resolve(bot_service.message_text(message))
         except Resolver404:

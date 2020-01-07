@@ -1,6 +1,6 @@
 django>=2.0
 djangorestframework>=3.8
-python-telegram-bot==4.2.0
+python-telegram-bot==12.2.0
 Jinja2==2.8
 jinja2-time==0.1.0
 requests==2.10.0
